@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import * as FirestoreService from './services/firestore';
+import { authenticateAnonymously, getGroceryList } from './services/firestore';
 
 import CreateList from './scenes/CreateList/CreateList';
 import JoinList from './scenes/JoinList/JoinList';
@@ -22,13 +22,13 @@ function App() {
 
   // Use an effect to authenticate and load the grocery list from the database
   useEffect(() => {
-    FirestoreService.authenticateAnonymously()
+    authenticateAnonymously()
     .then(userCredential => {
       setUserId(userCredential.user.uid);
       console.log('Get those groceries!', groceryListId)
 
       if (groceryListId) {
-        FirestoreService.getGroceryList(groceryListId)
+        getGroceryList(groceryListId)
           .then(groceryList => {
             if (groceryList.exists) {
               setError(null);
@@ -58,7 +58,7 @@ function App() {
 
   function onSelectUser(userName) {
     setUser(userName);
-    FirestoreService.getGroceryList(groceryListId)
+    getGroceryList(groceryListId)
       .then(updatedGroceryList => setGroceryList(updatedGroceryList.data()))
       .catch(() => setError('grocery-list-get-fail'));
   }
