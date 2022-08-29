@@ -1,44 +1,35 @@
-import React from 'react'
-import { Provider } from 'react-redux'
-import firebase from 'firebase/app'
-import 'firebase/auth'
+import create from 'zustand';
+import { getJokeReq } from './norris.api';
+import axios from "axios";
 
-import { createStore, combineReducers } from 'redux'
+export const getJokeReq = () => {
+    const controller = new AbortController();
+    const { signal, abort } = controller;
 
-import {
-  ReactReduxFirebaseProvider,
-  firebaseReducer
-} from 'react-redux-firebase'
+    const request = axios.get('https://api.chucknorris.io/jokes/random', { signal }).then(r => r.data);
 
-// react-redux-firebase config
-const rrfConfig = {
-  userProfile: 'users'
+    return { request, abort };
 }
 
-// Add firebase to reducers
-const rootReducer = combineReducers({
-  firebase: firebaseReducer
-})
+export const useNorrisJokes = create(set => ({
+    joke: null,
+    fetchJoke: () => {
+        const { request, abort } = getJokeReq();
+        request.then(joke => {
+            // console.log('Hello joke', joke)
+            set({ joke })
+        });
 
-// Create store with reducers and initial state
-const initialState = {}
-const store = createStore(rootReducer, initialState)
+        return abort;
+    }
+}));
 
-const rrfProps = {
-  firebase,
-  config: rrfConfig,
-  dispatch: store.dispatch
-}
+/**
+  const fetchJoke = useNorrisJokes(({fetchJoke}) => fetchJoke);
 
-// Setup react-redux so that connect HOC can be used
-export function StateWrapper(props) {
-  return (
-    <Provider store={store}>
-      <ReactReduxFirebaseProvider {...rrfProps}>
-        {props.children}
-      </ReactReduxFirebaseProvider>
-    </Provider>
-  )
-}
-
-export default StateWrapper
+	useEffect(() => {
+		// with abort
+		return fetchJoke()
+		// eslint-disable-next-line
+	}, []);
+ */

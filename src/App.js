@@ -1,49 +1,36 @@
-import React, { useState, useEffect } from 'react';
-
-import { authenticateAnonymously, getGroceryList } from './services/firestore';
+import React, { useEffect } from 'react';
 
 import CreateList from './scenes/CreateList/CreateList';
 import JoinList from './scenes/JoinList/JoinList';
 import EditList from './scenes/EditList/EditList';
 import ErrorMessage from './components/ErrorMessage/ErrorMessage';
 
-import useQueryString from './hooks/useQueryString'
+import useQueryString from './hooks/useQueryString';
+import { useUser } from './hooks/useUser';
+import { useGroceries } from './hooks/useGroceries'
+
+import shallow from 'zustand/shallow'
 
 
 function App() {
 
-  const [user, setUser] = useState();
-  const [groceryList, setGroceryList] = useState();
-  const [userId, setUserId] = useState();
-  const [error, setError] = useState();
+  const { login, user, setUser, userId, error: userError } = useUser((p) => (p), shallow);
+  const { fetchGroceryList, groceryList, setGroceryList, error: groceryListError } = useGroceries((p) => (p), shallow)
 
   // Use a custom hook to subscribe to the grocery list ID provided as a URL query parameter
   const [groceryListId, setGroceryListId] = useQueryString('listId');
 
-  // useState(() => console.log('Hello app: ', process.env), []);
-
   // Use an effect to authenticate and load the grocery list from the database
   useEffect(() => {
-    authenticateAnonymously()
-    .then(userCredential => {
-      setUserId(userCredential.user.uid);
-
-      if (groceryListId) {
-        getGroceryList(groceryListId)
-          .then(groceryList => {
-            if (groceryList.exists) {
-              setError(null);
-              setGroceryList(groceryList.data());
-            } else {
-              setError('grocery-list-not-found');
-              setGroceryListId();
-            }
-          })
-          .catch(() => setError('grocery-list-get-fail'));
+    login()
+    .then(() => {
+      if (!groceryListId) {
+        return
       }
+
+      fetchGroceryList(groceryListId)
     })
-    .catch(() => setError('anonymous-auth-failed'));
-  }, [groceryListId, setGroceryListId]);
+  }, [groceryListId]);
 
   function onGroceryListCreate(groceryListId, userName) {
     setGroceryListId(groceryListId);
@@ -58,9 +45,7 @@ function App() {
 
   function onSelectUser(userName) {
     setUser(userName);
-    getGroceryList(groceryListId)
-      .then(updatedGroceryList => setGroceryList(updatedGroceryList.data()))
-      .catch(() => setError('grocery-list-get-fail'));
+    fetchGroceryList(groceryListId);
   }
   
   // render a scene based on the current state
@@ -70,13 +55,13 @@ function App() {
 
   if (groceryList) {
     return <div>
-      <ErrorMessage errorCode={error}></ErrorMessage>
+      <ErrorMessage errorCode={groceryListError || userError}></ErrorMessage>
       <JoinList users={groceryList.users} {...{groceryListId, onSelectUser, onCloseGroceryList, userId}} />
     </div>
   }
 
   return <div>
-    <ErrorMessage errorCode={error} />
+    <ErrorMessage errorCode={groceryListError || userError} />
     <CreateList onCreate={onGroceryListCreate} userId={userId} />
   </div>
 }
