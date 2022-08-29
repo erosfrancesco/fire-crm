@@ -20,7 +20,7 @@ function App() {
   // Use a custom hook to subscribe to the grocery list ID provided as a URL query parameter
   const [groceryListId, setGroceryListId] = useQueryString('listId');
 
-  useState(() => console.log('Hello app: ', process.env), []);
+  // useState(() => console.log('Hello app: ', process.env), []);
 
   // Use an effect to authenticate and load the grocery list from the database
   useEffect(() => {
