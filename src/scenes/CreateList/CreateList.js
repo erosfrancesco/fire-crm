@@ -35,7 +35,6 @@ function CreateList(props) {
          */
         FirestoreService.createGroceryList(userName, userId)
             .then(docRef => {
-                console.log('Got docref: ', docRef)
                 onCreate(docRef.id, userName);
             })
             .catch(reason => setError('create-list-error'));

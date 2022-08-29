@@ -20,12 +20,7 @@ const db = getFirestore(app)
 export const collectionName = 'groceryLists';
 
 export const createGroceryList = (userName, userId) => {
-
-    console.log(userName, userId);
-
     const groceriesColRef = collection(db, collectionName);
-    console.log('Got groceries collection', groceriesColRef);
-
     
     const doc = addDoc(groceriesColRef, {
             created: serverTimestamp(),
@@ -35,8 +30,6 @@ export const createGroceryList = (userName, userId) => {
                 name: userName
             }]
     });
-
-    console.log('Creted doc: ', doc)
 
     return doc;
 };

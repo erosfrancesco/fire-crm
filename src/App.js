@@ -22,10 +22,10 @@ function App() {
 
   // Use an effect to authenticate and load the grocery list from the database
   useEffect(() => {
+    console.log('Hello app: ', process.env);
     authenticateAnonymously()
     .then(userCredential => {
       setUserId(userCredential.user.uid);
-      console.log('Get those groceries!', groceryListId)
 
       if (groceryListId) {
         getGroceryList(groceryListId)
@@ -45,7 +45,6 @@ function App() {
   }, [groceryListId, setGroceryListId]);
 
   function onGroceryListCreate(groceryListId, userName) {
-    console.log('Hello list ', groceryListId, userName)
     setGroceryListId(groceryListId);
     setUser(userName);
   }
@@ -65,7 +64,6 @@ function App() {
   
   // render a scene based on the current state
   if (groceryList && user) {
-    console.log('Helo ')
     return <EditList {...{ groceryListId, user, onCloseGroceryList, userId}} />;
   }
 
