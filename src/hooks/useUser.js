@@ -1,5 +1,5 @@
 import create from 'zustand';
-import { authenticateAnonymously } from '../services/firestore';
+import { authenticateAnonymously } from '../services/auth';
 
 export const useUser = create(set => ({
     // state

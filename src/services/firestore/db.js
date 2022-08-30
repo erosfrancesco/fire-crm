@@ -15,7 +15,7 @@ import {
     arrayUnion
 } from "firebase/firestore";
 
-const db = getFirestore(app)
+export const db = getFirestore(app)
 
 export const collectionName = 'groceryLists';
 
@@ -76,3 +76,5 @@ export const addGroceryListItem = (item, groceryListId, userId) => {
             throw new Error('duplicate-item-error');
         });
 };
+
+export default db;
